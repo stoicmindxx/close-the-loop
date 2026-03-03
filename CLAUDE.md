@@ -1,63 +1,77 @@
-# Universal Project Rules
+# Close the Loop Tracker Server
+
+## What this is
+This is the production server for Close the Loop, a 30-day behavioral execution tracker sold by @stoicmind. The tracker is a single-page static site served at tracker.stoicmind.org.
 
 ## Critical Rules (NEVER ignore these)
-- BEFORE writing any function, grep the codebase for existing implementations
-- BEFORE implementing a pattern, search for how it is already done in this project
-- NEVER create files in src/utils/ without first checking for duplicates
-- NEVER swallow errors with empty catch blocks
+- NEVER modify index.html content without explicit instruction
+- NEVER install Node.js, Python, or any runtime for this site
+- NEVER set up a reverse proxy. This is purely static.
+- NEVER expose any other ports or services through the nginx config
+- NEVER create a database or any server-side storage
 - NEVER make changes beyond the scope of the current task
-- NEVER remove existing safety checks, race condition guards, or error tracking
-- ALWAYS run tests after making changes
-- ALWAYS ask clarifying questions before making architectural changes
+- BEFORE making any change, understand the existing structure first
 
-## Commands
-- Test: `[PROJECT_TEST_COMMAND]`
-- Lint: `[PROJECT_LINT_COMMAND]`
-- Type check: `[PROJECT_TYPE_CHECK_COMMAND]`
-- Dev server: `[PROJECT_DEV_COMMAND]`
+## Server
+- Provider: DigitalOcean
+- OS: Ubuntu 24.04.4 LTS
+- IP: 159.203.109.157
+- Domain: tracker.stoicmind.org (A record pointing to this IP)
+- Web server: nginx (serving static files)
+- SSL: certbot / Let's Encrypt
 
-## Architecture
-src/
-  api/        -> Route handlers only. No business logic here.
-  services/   -> Business logic. Called by api/ layer.
-  models/     -> Data models and schemas.
-  utils/      -> Shared utilities. ONE canonical location.
-  config/     -> Configuration and environment management.
-  types/      -> Shared type definitions.
-tests/        -> Mirrors src/ structure exactly.
-scripts/      -> Build, deploy, migration scripts.
-agent_docs/   -> Detailed conventions for AI agents.
+## Site Structure
+All static files live in /var/www/tracker/:
 
-## Code Reuse (most violated rule in AI-assisted codebases)
-- If a pattern exists, use it. Do not reinvent it.
-- If a library provides the functionality, use the library.
-- If logic is used 2+ times, extract it to src/utils/.
-- Name utility files by domain (string-utils, date-utils). Never "helpers" or "misc".
+/var/www/tracker/
+  index.html            -> The entire tracker app (single file, vanilla JS/CSS/HTML)
+  favicon.ico
+  favicon-16x16.png
+  favicon-32x32.png
+  apple-touch-icon.png
 
-## Conventions Summary
-- Files: kebab-case (user-profile.ts, user_profile.py)
-- Functions: verb-first (get_user, validate_input, create_order)
-- Booleans: is/has/should prefix (is_active, has_permission)
-- Constants: UPPER_SNAKE_CASE
-- Modules: noun describing domain (auth, billing, notifications)
+There is no build step. No framework. No dependencies. One self-contained HTML file with inline CSS and JavaScript.
 
-## Detailed Guides (read before relevant tasks)
-- @agent_docs/code_conventions.md - Full naming, imports, file structure rules
-- @agent_docs/error_handling.md - The ONE error handling pattern for this project
-- @agent_docs/api_patterns.md - API design, response envelopes, pagination
-- @agent_docs/testing_guide.md - What to test, how to test, where tests go
-- @agent_docs/architecture.md - System boundaries, data flow, key decisions
+## How the Tracker Works
+- Gate screen: user enters access code (discipline) from purchase email
+- Start screen: user clicks begin, sets Day 1 to today
+- Tracker screen: 30-day grid, one entry per day via 4-step protocol modal
+- Protocol sequence: the priority, the obstacle, the lie, the schedule
+- All data persists in browser localStorage (key: ctl_data)
+- Completion screen: screenshottable proof card after 30 days
+- No backend. No database. No server-side logic.
 
-## Gotchas
-- [Add project-specific traps here]
-- [Things that look like bugs but are intentional]
-- [Files that must never be modified directly]
+## Brand
+- Colors: Green #294036, Off-white #F5F0E8, Gold #C9A84C, Black #0D1F17
+- Typography: Outfit (300/400/600/700), DM Mono (400) from Google Fonts
+- Voice: all lowercase in content. direct. no fluff.
+
+## Nginx Config Rules
+- Serve static files from /var/www/tracker/
+- Listen on port 80 (HTTP) and 443 (HTTPS after certbot)
+- Server name: tracker.stoicmind.org
+- Set appropriate cache headers for static assets
+- Set X-Content-Type-Options: nosniff
+- Set X-Frame-Options: DENY (tracker should not be iframed)
+- Gzip HTML, CSS, JS
+
+## SSL
+Use certbot with nginx plugin. Domain: tracker.stoicmind.org. Auto-renew via certbot default systemd timer.
+
+## Deployment
+1. Replace /var/www/tracker/index.html with new version
+2. No restart needed. Nginx serves static files directly.
+
+## Conventions
+- All content text: lowercase. direct. no fluff.
+- CSS: inline in index.html. No external stylesheets beyond Google Fonts.
+- JS: inline in index.html. No external scripts.
+- Colors: only use brand palette (#294036, #F5F0E8, #C9A84C, #0D1F17)
+- Typography: only Outfit and DM Mono
 
 ## Workflow
 1. Understand the task. Ask questions if anything is unclear.
-2. Read relevant agent_docs/ files for the type of work.
-3. Search codebase for existing patterns and utilities.
-4. Plan the approach. Use Plan Mode for multi-file changes.
-5. Implement following existing patterns.
-6. Run tests and lint.
-7. Review own work for duplication and scope creep.
+2. Review current index.html before making changes.
+3. Make targeted changes only. Do not refactor unrelated code.
+4. Test in browser after changes.
+5. Verify mobile responsiveness.
