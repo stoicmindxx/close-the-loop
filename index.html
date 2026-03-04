@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Close the Loop — Stoicmind</title>
+<meta name="description" content="30-day execution tracker. Name the priority. Catch the lie. Lock in the plan.">
+<meta name="theme-color" content="#294036">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#294036;--offwhite:#F5F0E8;--gold:#C9A84C;--black:#0D1F17;
+}
+html,body{
+  background:#294036 !important;color:var(--offwhite);font-family:'Outfit',sans-serif;
+  min-height:100vh;min-height:100dvh;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+}
+input,textarea,button{font-family:inherit;outline:none;border:none;background:none}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+textarea{-webkit-appearance:none}
+
+/* animations */
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,0.3)}50%{box-shadow:0 0 0 8px rgba(201,168,76,0)}}
+@keyframes modalIn{from{opacity:0;transform:scale(0.95) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes fadeOut{from{opacity:1}to{opacity:0}}
+
+.fade-in{animation:fadeIn 0.5s ease both}
+.fade-in-1{animation:fadeIn 0.6s ease 0.1s both}
+.fade-in-2{animation:fadeIn 0.6s ease 0.2s both}
+.fade-in-3{animation:fadeIn 0.6s ease 0.3s both}
+.fade-in-4{animation:fadeIn 0.6s ease 0.4s both}
+.fade-in-5{animation:fadeIn 0.6s ease 0.5s both}
+.fade-in-7{animation:fadeIn 0.6s ease 0.7s both}
+.shake{animation:shake 0.5s ease}
+
+/* screens */
+.screen{display:none;min-height:100vh;min-height:100dvh;background:#294036}
+.screen.active{display:flex}
+
+/* gate */
+#gate{flex-direction:column;align-items:center;justify-content:center;padding:32px 24px}
+#gate .logo{text-align:center;margin-bottom:8px}
+#gate h1{font-size:13px;letter-spacing:6px;text-transform:uppercase;font-weight:300;margin-bottom:4px}
+#gate .divider{width:40px;height:1px;background:var(--gold);margin:16px 0 32px}
+#gate h2{font-size:22px;font-weight:700;letter-spacing:1px;margin-bottom:4px}
+#gate .subtitle{color:rgba(245,240,232,0.35);font-size:13px;letter-spacing:2px;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:40px}
+#gate .input-wrap{width:100%;max-width:280px}
+#gate input{
+width:100%;padding:14px 16px;background:rgba(0,0,0,0.2);
+border:1px solid rgba(245,240,232,0.15);border-radius:6px;
+color:var(--offwhite);font-size:15px;font-family:'DM Mono',monospace;
+text-align:center;letter-spacing:2px;
+}
+#gate input.error{border-color:#8b4444}
+#gate .enter-btn{
+width:100%;padding:14px;margin-top:12px;background:#C9A84C;
+border-radius:6px;color:#0D1F17;font-size:13px;font-weight:700;
+letter-spacing:3px;text-transform:uppercase;
+}
+#gate .error-msg{color:#8b4444;font-size:12px;margin-top:12px;font-family:'DM Mono',monospace;letter-spacing:1px;display:none}
+#gate .hint{color:rgba(245,240,232,0.18);font-size:11px;margin-top:48px;font-family:'DM Mono',monospace}
+
+/* start */
+#start{flex-direction:column;align-items:center;padding:32px 20px}
+#start .intro{
+color:rgba(245,240,232,0.6);font-size:15px;font-weight:300;
+line-height:1.8;max-width:300px;text-align:center;margin:40px auto 32px;
+}
+#start .begin-btn{
+padding:16px 48px;background:var(--gold);border-radius:6px;
+color:var(--black);font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;
+}
+
+/* tracker */
+#tracker{flex-direction:column;align-items:center;padding:32px 20px 40px}
+.header{text-align:center;margin-bottom:28px}
+.header h1{font-size:11px;letter-spacing:5px;text-transform:uppercase;font-weight:300;margin-bottom:2px}
+.header .product-name{color:var(--gold);font-size:10px;font-family:'DM Mono',monospace;letter-spacing:2px;margin-top:8px}
+.stats{display:flex;justify-content:center;gap:24px;margin-bottom:24px;width:100%}
+.stat-group{display:flex;align-items:center;gap:24px}
+.stat{text-align:center}
+.stat-val{font-size:20px;font-weight:700;font-family:'DM Mono',monospace}
+.stat-label{color:rgba(245,240,232,0.3);font-size:9px;letter-spacing:2px;text-transform:uppercase;font-family:'DM Mono',monospace}
+.stat-divider{width:1px;height:32px;background:rgba(245,240,232,0.08)}
+.progress-bar{width:100%;max-width:400px;height:3px;background:rgba(0,0,0,0.2);border-radius:2px;margin-bottom:24px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),rgba(201,168,76,0.6));border-radius:2px;transition:width 0.5s ease}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;width:100%;max-width:400px;margin-bottom:8px}
+.day{
+aspect-ratio:1;border-radius:6px;display:flex;flex-direction:column;
+align-items:center;justify-content:center;transition:all 0.2s;
+border:1px solid;font-family:'DM Mono',monospace;
+}
+.day.future{background:rgba(0,0,0,0.1);border-color:rgba(245,240,232,0.08);opacity:0.25}
+.day.missed{background:rgba(0,0,0,0.15);border-color:rgba(245,240,232,0.06);opacity:0.4}
+.day.today{background:rgba(201,168,76,0.1);border-color:var(--gold);animation:pulse 2s infinite;cursor:pointer}
+.day.completed{background:rgba(201,168,76,0.15);border-color:rgba(201,168,76,0.4);cursor:pointer}
+.day .num{font-size:9px;color:rgba(245,240,232,0.4)}
+.day.today .num{color:var(--offwhite);font-weight:600}
+.day.completed .num{color:var(--gold)}
+.day .check{display:none}
+.day.completed .check{display:block}
+.day .dot{width:4px;height:4px;border-radius:50%;background:var(--gold);margin-top:1px;opacity:0.6;display:none}
+.day.completed.has-entry .dot{display:block}
+.day .dash{width:6px;height:1px;background:rgba(245,240,232,0.3);display:none}
+.day.missed .dash{display:block}
+.status-msg{text-align:center;font-size:12px;font-family:'DM Mono',monospace;letter-spacing:1px;margin-top:16px}
+
+/* modal overlay */
+.modal-overlay{
+position:fixed;inset:0;background:rgba(0,0,0,0.6);
+display:none;align-items:center;justify-content:center;
+padding:24px;z-index:100;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+}
+.modal-overlay.active{display:flex}
+.modal{
+width:100%;max-width:360px;background:var(--green);
+border:1px solid rgba(201,168,76,0.3);border-radius:12px;
+padding:24px;animation:modalIn 0.25s ease;
+}
+
+/* protocol modal */
+#protocol .modal-day{color:var(--gold);font-size:10px;font-family:'DM Mono',monospace;letter-spacing:2px;text-transform:uppercase}
+#protocol .close-btn{background:none;border:none;color:rgba(245,240,232,0.3);font-size:18px;padding:0 4px}
+#protocol .progress-dots{display:flex;gap:4px;margin-bottom:20px}
+#protocol .progress-dot{flex:1;height:2px;border-radius:1px;transition:all 0.3s}
+#protocol .progress-dot.active{background:var(--gold);opacity:1}
+#protocol .progress-dot.inactive{background:rgba(245,240,232,0.1);opacity:0.3}
+#protocol .line-label{color:var(--gold);font-size:10px;font-family:'DM Mono',monospace;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+#protocol .line-title{color:var(--offwhite);font-size:18px;font-weight:700;margin-bottom:4px}
+#protocol .line-prompt{color:rgba(245,240,232,0.6);font-size:14px;font-weight:300;margin-bottom:16px;line-height:1.5}
+#protocol textarea{
+width:100%;padding:12px 14px;background:rgba(0,0,0,0.25);
+border:1px solid rgba(245,240,232,0.12);border-radius:6px;
+color:var(--offwhite);font-size:14px;font-family:'DM Mono',monospace;
+resize:none;line-height:1.5;
+}
+#protocol .hint-row{display:flex;justify-content:space-between;align-items:center;margin-top:6px;margin-bottom:16px}
+#protocol .line-hint{color:rgba(245,240,232,0.25);font-size:11px;font-family:'DM Mono',monospace;font-style:italic}
+#protocol .char-count{color:rgba(245,240,232,0.2);font-size:10px;font-family:'DM Mono',monospace}
+#protocol .btn-row{display:flex;gap:8px}
+#protocol .back-btn{
+padding:14px 16px;border:1px solid rgba(245,240,232,0.12);border-radius:6px;
+color:rgba(245,240,232,0.4);font-size:13px;letter-spacing:1px;display:none;
+}
+#protocol .next-btn{
+flex:1;padding:14px;border-radius:6px;font-size:13px;font-weight:700;
+letter-spacing:3px;text-transform:uppercase;transition:all 0.2s;
+}
+#protocol .next-btn.enabled{background:var(--gold);color:var(--black);cursor:pointer}
+#protocol .next-btn.disabled{background:rgba(201,168,76,0.15);color:rgba(13,31,23,0.3);cursor:default}
+
+/* review modal */
+#review .modal{border-color:rgba(201,168,76,0.2)}
+#review .review-day{color:var(--gold);font-size:10px;font-family:'DM Mono',monospace;letter-spacing:2px;text-transform:uppercase}
+#review .entry-block{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(245,240,232,0.06)}
+#review .entry-block:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+#review .entry-label{color:var(--gold);font-size:9px;font-family:'DM Mono',monospace;letter-spacing:2px;margin-bottom:4px}
+#review .entry-value{color:rgba(245,240,232,0.75);font-size:14px;font-family:'DM Mono',monospace;line-height:1.5}
+
+/* completion */
+#completion{flex-direction:column;align-items:center;padding:40px 24px 60px}
+.proof-card{
+width:100%;max-width:360px;background:var(--black);border-radius:12px;
+border:2px solid var(--gold);padding:32px 24px;text-align:center;
+}
+.proof-card h2{color:var(--gold);font-size:28px;font-weight:700;letter-spacing:2px;margin-bottom:4px}
+.proof-card .proof-stats{color:rgba(245,240,232,0.5);font-size:12px;font-family:'DM Mono',monospace;letter-spacing:2px;margin-bottom:24px}
+.mini-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;max-width:240px;margin:0 auto 24px}
+.mini-day{
+aspect-ratio:1;border-radius:3px;display:flex;align-items:center;justify-content:center;
+}
+.mini-day.done{background:rgba(201,168,76,0.35);border:1px solid rgba(201,168,76,0.5)}
+.mini-day.not{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08)}
+.proof-card .brand-line{color:rgba(245,240,232,0.4);font-size:11px;font-family:'DM Mono',monospace;letter-spacing:1px}
+.screenshot-hint{color:rgba(245,240,232,0.35);font-size:12px;margin-top:24px;text-align:center;font-family:'DM Mono',monospace}
+.exec-log{width:100%;max-width:360px;margin-top:32px}
+.exec-log-title{color:var(--gold);font-size:10px;font-family:'DM Mono',monospace;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;text-align:center}
+.exec-log-entries{background:rgba(0,0,0,0.2);border-radius:8px;border:1px solid rgba(245,240,232,0.08);padding:16px;display:flex;flex-direction:column;gap:16px}
+.log-day{padding-bottom:16px;border-bottom:1px solid rgba(245,240,232,0.06)}
+.log-day:last-child{border-bottom:none}
+.log-day-label{color:var(--gold);font-size:9px;font-family:'DM Mono',monospace;letter-spacing:2px;margin-bottom:8px}
+.log-field{font-size:11px;font-family:'DM Mono',monospace;margin-bottom:4px}
+.log-field span{color:rgba(245,240,232,0.25)}
+.log-field.priority{color:rgba(245,240,232,0.6)}
+.log-field.obstacle{color:rgba(245,240,232,0.4)}
+.log-field.lie{color:rgba(245,240,232,0.7);font-size:13px;font-style:italic}
+.log-field.lie span{font-style:normal}
+.log-field.schedule{color:rgba(245,240,232,0.6)}
+.next-protocol{
+width:100%;max-width:360px;margin-top:32px;padding:20px;
+background:rgba(201,168,76,0.06);border-radius:8px;
+border:1px solid rgba(201,168,76,0.15);text-align:center;
+}
+.next-protocol p:first-child{color:var(--gold);font-size:11px;font-family:'DM Mono',monospace;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.next-protocol p:last-child{color:rgba(245,240,232,0.5);font-size:13px;font-weight:300;line-height:1.6}
+.restart-btn{
+margin-top:24px;padding:12px 24px;border:1px solid rgba(245,240,232,0.15);
+border-radius:6px;color:rgba(245,240,232,0.4);font-size:12px;
+font-family:'DM Mono',monospace;letter-spacing:1px;
+}
+</style>
+
+</head>
+<body style="background:#294036">
+
+<!-- LOGO SVG template -->
+
+<template id="logo-tpl">
+<svg width="48" height="72" viewBox="0 0 48 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="22" y="0" width="4" height="16" rx="2" fill="#F5F0E8" opacity="0.9"/>
+  <line x1="16" y1="14" x2="22" y2="18" stroke="#F5F0E8" stroke-width="2" opacity="0.7"/>
+  <line x1="32" y1="14" x2="26" y2="18" stroke="#F5F0E8" stroke-width="2" opacity="0.7"/>
+  <circle cx="24" cy="28" r="12" fill="none" stroke="#F5F0E8" stroke-width="2"/>
+  <circle cx="20" cy="26" r="2.5" fill="#294036" stroke="#F5F0E8" stroke-width="1"/>
+  <circle cx="28" cy="26" r="2.5" fill="#294036" stroke="#F5F0E8" stroke-width="1"/>
+  <path d="M20 33 L24 35 L28 33" fill="none" stroke="#F5F0E8" stroke-width="1.5"/>
+  <rect x="22.5" y="40" width="3" height="28" rx="1" fill="#F5F0E8" opacity="0.8"/>
+  <path d="M24 70 L20 64 L24 66 L28 64 Z" fill="#F5F0E8" opacity="0.8"/>
+</svg>
+</template>
+
+<!-- CHECK SVG template -->
+
+<template id="check-sm">
+<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+</template>
+
+<!-- ============ GATE SCREEN ============ -->
+
+<div id="gate" class="screen active">
+  <div class="logo fade-in"><img src="/stoicmind-logo.png" alt="Stoicmind" style="height:160px;margin:0 auto;display:block;"></div>
+  <h1 class="fade-in-1">stoicmind</h1>
+  <div class="divider fade-in-2"></div>
+  <h2 class="fade-in-3">close the loop</h2>
+  <p class="subtitle fade-in-4">30-day execution tracker</p>
+  <div class="input-wrap fade-in-5">
+    <input id="code-input" type="text" placeholder="enter access code" autocomplete="off" autocapitalize="off">
+    <button class="enter-btn" id="code-btn">enter</button>
+  </div>
+  <p class="error-msg" id="code-error">wrong code. check your purchase email.</p>
+  <p class="hint fade-in-7">access code is in your purchase confirmation</p>
+</div>
+
+<!-- ============ START SCREEN ============ -->
+
+<div id="start" class="screen">
+  <div class="header fade-in">
+    <div class="logo"></div>
+    <h1>stoicmind</h1>
+    <p class="product-name">CLOSE THE LOOP</p>
+  </div>
+  <p class="intro fade-in">30 days. 4 lines per day.<br>name the priority. face the obstacle.<br>catch the lie. lock in the plan.</p>
+  <button class="begin-btn fade-in" id="begin-btn">begin</button>
+</div>
+
+<!-- ============ TRACKER SCREEN ============ -->
+
+<div id="tracker" class="screen">
+  <div class="header fade-in">
+    <div class="logo"></div>
+    <h1>stoicmind</h1>
+    <p class="product-name">CLOSE THE LOOP</p>
+  </div>
+  <div class="stats fade-in">
+    <div class="stat-group">
+      <div class="stat"><p class="stat-val" id="stat-day" style="color:var(--gold)">1</p><p class="stat-label">day</p></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><p class="stat-val" id="stat-locked">0</p><p class="stat-label">done</p></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><p class="stat-val" id="stat-streak">0</p><p class="stat-label">streak</p></div>
+    </div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+  <div class="grid" id="day-grid"></div>
+  <p class="status-msg" id="status-msg"></p>
+</div>
+
+<!-- ============ PROTOCOL MODAL ============ -->
+
+<div id="protocol" class="modal-overlay">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <p class="modal-day" id="proto-day"></p>
+      <button class="close-btn" id="proto-close">×</button>
+    </div>
+    <div class="progress-dots" id="proto-dots"></div>
+    <p class="line-label" id="proto-label"></p>
+    <p class="line-title" id="proto-title"></p>
+    <p class="line-prompt" id="proto-prompt"></p>
+    <textarea id="proto-input" rows="2" maxlength="140"></textarea>
+    <div class="hint-row">
+      <span class="line-hint" id="proto-hint"></span>
+      <span class="char-count" id="proto-chars">0/140</span>
+    </div>
+    <div class="btn-row">
+      <button class="back-btn" id="proto-back">back</button>
+      <button class="next-btn disabled" id="proto-next">next</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ REVIEW MODAL ============ -->
+
+<div id="review" class="modal-overlay">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <p class="review-day" id="review-day"></p>
+      <button class="close-btn" id="review-close">×</button>
+    </div>
+    <div id="review-entries"></div>
+  </div>
+</div>
+
+<!-- ============ COMPLETION SCREEN ============ -->
+
+<div id="completion" class="screen">
+  <div class="proof-card">
+    <div class="logo"></div>
+    <div style="width:40px;height:1px;background:var(--gold);margin:16px auto"></div>
+    <h2>30 DAYS. LOCKED.</h2>
+    <p class="proof-stats" id="comp-stats"></p>
+    <div class="mini-grid" id="comp-grid"></div>
+    <div style="width:100%;height:1px;background:rgba(201,168,76,0.2);margin-bottom:16px"></div>
+    <p class="brand-line">close the loop — stoicmind.org</p>
+  </div>
+  <p class="screenshot-hint">screenshot this. that's your proof.</p>
+  <div class="exec-log" id="exec-log"></div>
+  <div class="next-protocol">
+    <p>you proved you can execute.</p>
+    <p>the next protocol drops soon. you'll be the first to know.</p>
+  </div>
+  <button class="restart-btn" id="restart-btn">start another 30 days</button>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+// ── CONFIG ──
+const ACCESS_CODE = "discipline";
+const STORAGE_KEY = "ctl_data";
+const LINES = [
+  { label:"LINE 1", title:"the priority", prompt:"what's the one thing you need to do today?", placeholder:'"finish the proposal for monday"', hint:"one task. not a category." },
+  { label:"LINE 2", title:"the obstacle", prompt:"what's the real obstacle between you and this getting done?", placeholder:'"i keep waiting for a longer block of time"', hint:"be honest. not dramatic." },
+  { label:"LINE 3", title:"the lie", prompt:"what excuse will you use to not do it?", placeholder:'"i\'ll start after this episode"', hint:"the sentence already forming in your head." },
+  { label:"LINE 4", title:"the schedule", prompt:"when exactly will you do it? include the trigger.", placeholder:'"after i close my laptop at 5, i open the doc"', hint:"if-then beats a clock time." },
+];
+const FIELD_KEYS = ["priority","cost","lie","schedule"];
+
+// ── STATE ──
+let state = null;
+
+function defaultState(){
+  return { startDate:null, entries:{}, completed:false };
+}
+
+function save(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+}
+
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){ state = JSON.parse(raw); return true; }
+  }catch(e){}
+  state = defaultState();
+  return false;
+}
+
+// ── DATE HELPERS ──
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+
+function daysBetween(a,b){
+  const da = new Date(a+"T00:00:00");
+  const db = new Date(b+"T00:00:00");
+  return Math.floor((db-da)/(1000*60*60*24));
+}
+
+function currentDayIndex(){
+  if(!state.startDate) return 0;
+  const diff = daysBetween(state.startDate, todayStr());
+  return Math.max(0, Math.min(29, diff));
+}
+
+function dayStatus(i){
+  const ci = currentDayIndex();
+  if(state.entries[i]) return "completed";
+  if(i < ci) return "missed";
+  if(i === ci) return "today";
+  return "future";
+}
+
+function completedCount(){
+  return Object.keys(state.entries).length;
+}
+
+function streak(){
+  let s = 0;
+  const ci = currentDayIndex();
+  for(let i = ci; i >= 0; i--){
+    if(state.entries[i]) s++;
+    else break;
+  }
+  return s;
+}
+
+function isFinished(){
+  if(state.completed) return true;
+  const ci = currentDayIndex();
+  if(ci >= 29){
+    const total = completedCount() + countMissed();
+    if(total >= 30){ state.completed = true; save(); return true; }
+    // day 30 reached: check if today is done or past
+    if(ci >= 29 && (state.entries[29] || daysBetween(state.startDate, todayStr()) > 29)){
+      state.completed = true; save(); return true;
+    }
+  }
+  return false;
+}
+
+function countMissed(){
+  const ci = currentDayIndex();
+  let m = 0;
+  for(let i = 0; i < ci; i++){ if(!state.entries[i]) m++; }
+  return m;
+}
+
+// ── LOGO INJECTION ──
+function injectLogos(){
+  document.querySelectorAll(".logo").forEach(el=>{
+    if(!el.innerHTML.trim()) el.innerHTML='<img src="/stoicmind-logo.png" alt="Stoicmind" style="height:80px;margin:0 auto;display:block;">';
+  });
+}
+
+// ── SCREENS ──
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+// ── GATE ──
+const codeInput = document.getElementById("code-input");
+const codeBtn = document.getElementById("code-btn");
+const codeError = document.getElementById("code-error");
+
+function tryUnlock(){
+  if(codeInput.value.toLowerCase().trim() === ACCESS_CODE){
+    if(!state.startDate) showScreen("start");
+    else if(isFinished()) showCompletion();
+    else showTracker();
+  } else {
+    codeInput.classList.add("error");
+    codeInput.parentElement.classList.add("shake");
+    codeError.style.display = "block";
+    setTimeout(()=>{ codeInput.parentElement.classList.remove("shake"); },500);
+    setTimeout(()=>{ codeInput.classList.remove("error"); codeError.style.display="none"; },2000);
+  }
+}
+
+codeBtn.addEventListener("click", tryUnlock);
+codeInput.addEventListener("keydown", e=>{ if(e.key==="Enter") tryUnlock(); });
+
+// ── START ──
+document.getElementById("begin-btn").addEventListener("click", ()=>{
+  state.startDate = todayStr();
+  save();
+  showTracker();
+});
+
+// ── TRACKER ──
+function showTracker(){
+  showScreen("tracker");
+  renderGrid();
+  updateStats();
+}
+
+function renderGrid(){
+  const grid = document.getElementById("day-grid");
+  grid.innerHTML = "";
+  for(let i = 0; i < 30; i++){
+    const s = dayStatus(i);
+    const div = document.createElement("div");
+    div.className = "day "+s;
+    if(s === "completed" && state.entries[i]) div.classList.add("has-entry");
+
+    if(s === "completed"){
+      div.innerHTML = `<svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><div class="dot"></div><span class="num">${i+1}</span>`;
+    } else if(s === "missed"){
+      div.innerHTML = `<div class="dash"></div><span class="num">${i+1}</span>`;
+    } else {
+      div.innerHTML = `<span class="num">${i+1}</span>`;
+    }
+
+    if(s === "today") div.addEventListener("click", ()=> openProtocol(i));
+    if(s === "completed" && state.entries[i]) div.addEventListener("click", ()=> openReview(i));
+    grid.appendChild(div);
+  }
+
+  const ci = currentDayIndex();
+  const msg = document.getElementById("status-msg");
+  if(dayStatus(ci) === "today"){
+    msg.style.color = "var(--gold)";
+    msg.textContent = "tap day "+(ci+1)+" to run today's protocol";
+  } else if(dayStatus(ci) === "completed"){
+    msg.style.color = "rgba(245,240,232,0.3)";
+    msg.textContent = "locked in. come back tomorrow.";
+  } else {
+    msg.textContent = "";
+  }
+}
+
+function updateStats(){
+  const ci = currentDayIndex();
+  const cc = completedCount();
+  const st = streak();
+  document.getElementById("stat-day").textContent = ci+1;
+  document.getElementById("stat-locked").textContent = cc;
+  document.getElementById("stat-streak").textContent = st;
+  document.getElementById("stat-streak").style.color = st > 0 ? "var(--gold)" : "rgba(245,240,232,0.3)";
+  document.getElementById("progress-fill").style.width = ((cc/30)*100)+"%";
+}
+
+// ── PROTOCOL MODAL ──
+let protoStep = 0;
+let protoEntries = ["","","",""];
+let protoDayIdx = 0;
+
+function openProtocol(dayIdx){
+  protoDayIdx = dayIdx;
+  protoStep = 0;
+  protoEntries = ["","","",""];
+  document.getElementById("protocol").classList.add("active");
+  document.getElementById("proto-day").textContent = "day "+(dayIdx+1);
+  renderProtoStep();
+  setTimeout(()=> document.getElementById("proto-input").focus(), 100);
+}
+
+function renderProtoStep(){
+  const line = LINES[protoStep];
+  // dots
+  const dots = document.getElementById("proto-dots");
+  dots.innerHTML = "";
+  for(let i=0;i<4;i++){
+    const d = document.createElement("div");
+    d.className = "progress-dot "+(i<=protoStep?"active":"inactive");
+    dots.appendChild(d);
+  }
+  document.getElementById("proto-label").textContent = line.label;
+  document.getElementById("proto-title").textContent = line.title;
+  document.getElementById("proto-prompt").textContent = line.prompt;
+  const input = document.getElementById("proto-input");
+  input.value = protoEntries[protoStep];
+  input.placeholder = line.placeholder;
+  document.getElementById("proto-hint").textContent = line.hint;
+  document.getElementById("proto-chars").textContent = protoEntries[protoStep].length+"/140";
+
+  const backBtn = document.getElementById("proto-back");
+  backBtn.style.display = protoStep > 0 ? "block" : "none";
+
+  updateNextBtn();
+  setTimeout(()=> input.focus(), 50);
+}
+
+function updateNextBtn(){
+  const btn = document.getElementById("proto-next");
+  const hasText = protoEntries[protoStep].trim().length > 0;
+  btn.className = "next-btn "+(hasText?"enabled":"disabled");
+  btn.textContent = protoStep === 3 ? "lock it in" : "next";
+}
+
+document.getElementById("proto-input").addEventListener("input", e=>{
+  protoEntries[protoStep] = e.target.value;
+  document.getElementById("proto-chars").textContent = e.target.value.length+"/140";
+  updateNextBtn();
+});
+
+document.getElementById("proto-input").addEventListener("keydown", e=>{
+  if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); advanceProto(); }
+});
+
+document.getElementById("proto-next").addEventListener("click", advanceProto);
+document.getElementById("proto-back").addEventListener("click", ()=>{
+  if(protoStep > 0){ protoStep--; renderProtoStep(); }
+});
+document.getElementById("proto-close").addEventListener("click", closeProtocol);
+document.getElementById("protocol").addEventListener("click", e=>{
+  if(e.target === e.currentTarget) closeProtocol();
+});
+
+function advanceProto(){
+  if(protoEntries[protoStep].trim().length === 0) return;
+  if(protoStep === 3){
+    // save
+    state.entries[protoDayIdx] = {};
+    for(let i=0;i<4;i++) state.entries[protoDayIdx][FIELD_KEYS[i]] = protoEntries[i].trim();
+    save();
+    closeProtocol();
+    if(isFinished()) showCompletion();
+    else { renderGrid(); updateStats(); }
+  } else {
+    protoStep++;
+    renderProtoStep();
+  }
+}
+
+function closeProtocol(){
+  document.getElementById("protocol").classList.remove("active");
+}
+
+// ── REVIEW MODAL ──
+function openReview(dayIdx){
+  const entry = state.entries[dayIdx];
+  if(!entry) return;
+  document.getElementById("review").classList.add("active");
+  document.getElementById("review-day").textContent = "day "+(dayIdx+1)+" — locked in";
+  const labels = ["PRIORITY","OBSTACLE","LIE CAUGHT","SCHEDULED"];
+  const container = document.getElementById("review-entries");
+  container.innerHTML = "";
+  FIELD_KEYS.forEach((key,i)=>{
+    const block = document.createElement("div");
+    block.className = "entry-block";
+    block.innerHTML = `<p class="entry-label">${labels[i]}</p><p class="entry-value">${escHtml(entry[key]||"")}</p>`;
+    container.appendChild(block);
+  });
+}
+
+document.getElementById("review-close").addEventListener("click", ()=> document.getElementById("review").classList.remove("active"));
+document.getElementById("review").addEventListener("click", e=>{
+  if(e.target === e.currentTarget) document.getElementById("review").classList.remove("active");
+});
+
+// ── COMPLETION ──
+function showCompletion(){
+  showScreen("completion");
+  const cc = completedCount();
+  const entryCount = Object.keys(state.entries).length;
+  document.getElementById("comp-stats").textContent = cc+"/30 EXECUTED · "+entryCount+(entryCount===1?" LOOP CLOSED":" LOOPS CLOSED");
+
+  // mini grid
+  const grid = document.getElementById("comp-grid");
+  grid.innerHTML = "";
+  for(let i=0;i<30;i++){
+    const div = document.createElement("div");
+    const done = !!state.entries[i];
+    div.className = "mini-day "+(done?"done":"not");
+    if(done){
+      const tpl = document.getElementById("check-sm");
+      div.appendChild(tpl.content.cloneNode(true));
+    }
+    grid.appendChild(div);
+  }
+
+  // execution log
+  const logWrap = document.getElementById("exec-log");
+  logWrap.innerHTML = "";
+  const sorted = Object.entries(state.entries).sort((a,b)=> Number(a[0])-Number(b[0]));
+  if(sorted.length > 0){
+    const title = document.createElement("p");
+    title.className = "exec-log-title";
+    title.textContent = "your execution log";
+    logWrap.appendChild(title);
+
+    const entriesDiv = document.createElement("div");
+    entriesDiv.className = "exec-log-entries";
+    sorted.forEach(([day, entry])=>{
+      const d = document.createElement("div");
+      d.className = "log-day";
+      d.innerHTML = `
+        <p class="log-day-label">DAY ${Number(day)+1}</p>
+        <p class="log-field priority"><span>priority:</span> ${escHtml(entry.priority)}</p>
+        <p class="log-field obstacle"><span>obstacle:</span> ${escHtml(entry.cost)}</p>
+        <p class="log-field lie"><span>lie:</span> "${escHtml(entry.lie)}"</p>
+        <p class="log-field schedule"><span>scheduled:</span> ${escHtml(entry.schedule)}</p>
+      `;
+      entriesDiv.appendChild(d);
+    });
+    logWrap.appendChild(entriesDiv);
+  }
+}
+
+document.getElementById("restart-btn").addEventListener("click", ()=>{
+  state = defaultState();
+  save();
+  showScreen("start");
+});
+
+// ── UTILS ──
+function escHtml(s){
+  const d = document.createElement("div");
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// ── INIT ──
+function init(){
+  injectLogos();
+  load();
+  // If already started and not complete, go to tracker (skip gate for now - they need to enter code)
+  // Gate is always first. After unlock, route based on state.
+  showScreen("gate");
+}
+
+init();
+
+})();
+</script>
+
+</body>
+</html>
